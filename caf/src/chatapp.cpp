@@ -248,24 +248,27 @@ client(caf::stateful_actor<client_state>* self, const uint64_t /*id*/,
           self->send(accumulator, stop_atom::value, action::compute);
           break;
         case action::invite: {
-          assert(s.friends.size() != 0);
-          auto created = self->spawn(chat, self);
-          s.chats.emplace_back(created);
-          std::vector<caf::actor> f(s.friends.size());
-          std::copy(s.friends.begin(), s.friends.end(), f.begin());
-          s.rand.shuffle(f);
-          auto invitations = static_cast<size_t>(
-            s.rand.next_int(static_cast<uint32_t>(s.friends.size())));
-          if (invitations == 0)
-            invitations = 1;
-          self->send(accumulator, bump_atom::value, action::invite,
-                     invitations);
-          for (size_t i = 0; i < invitations; ++i)
-            self->send(created, join_atom::value, f[i], accumulator);
+          if (s.friends.empty()) {
+            self->send(accumulator, stop_atom::value, action::none);
+          } else {
+            auto created = self->spawn(chat, self);
+            s.chats.emplace_back(created);
+            std::vector<caf::actor> f(s.friends.size());
+            std::copy(s.friends.begin(), s.friends.end(), f.begin());
+            s.rand.shuffle(f);
+            auto invitations = static_cast<size_t>(
+              s.rand.next_int(static_cast<uint32_t>(s.friends.size())));
+            if (invitations == 0)
+              invitations = 1;
+            self->send(accumulator, bump_atom::value, action::invite,
+                       invitations);
+            for (size_t i = 0; i < invitations; ++i)
+              self->send(created, join_atom::value, f[i], accumulator);
+          }
           break;
         }
         default: // case action::none:
-          assert(s.chats().size() == 0 && s.friends.size() > 0);
+          assert(s.chats.empty() && !s.friends.empty());
           self->send(accumulator, stop_atom::value, action::none);
           break;
       }
