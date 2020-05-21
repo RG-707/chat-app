@@ -233,52 +233,37 @@ client(caf::stateful_actor<client_state>* self, const uint64_t /*id*/,
       uint8_t fib_index = 35;
       auto index = static_cast<size_t>(
         s.rand.next_int(static_cast<uint32_t>(s.chats.size())));
-      switch (factory.apply(s.rand.next_int(100))) {
-        case action::post:
-          if (!s.chats.empty())
-            self->send(s.chats[index], post_atom::value, payload{},
-                       accumulator);
-          else
-            self->send(accumulator, stop_atom::value, action::none);
-          break;
-        case action::leave:
-          if (!s.chats.empty())
-            self->send(s.chats[index], leave_atom::value, self, false,
-                       accumulator);
-          else
-            self->send(accumulator, stop_atom::value, action::none);
-          break;
-        case action::compute:
-	  for(size_t i = 0; i < 10000; ++i) {
-            if (fibonacci(fib_index) != 9227465) {
-              self->send(accumulator, stop_atom::value, action::error);
-	      fib_index = fib_index + 1;;
-	    }
-	  }
-
-          self->send(accumulator, stop_atom::value, action::compute);
-          break;
-        case action::invite: {
-          assert(s.friends.size() != 0);
-          auto created = self->spawn(chat, self);
-          s.chats.emplace_back(created);
-          std::vector<caf::actor> f(s.friends.size());
-          std::copy(s.friends.begin(), s.friends.end(), f.begin());
-          s.rand.shuffle(f);
-          auto invitations = static_cast<size_t>(
-            s.rand.next_int(static_cast<uint32_t>(s.friends.size())));
-          if (invitations == 0)
-            invitations = 1;
-          self->send(accumulator, bump_atom::value, action::invite,
-                     invitations);
-          for (size_t i = 0; i < invitations; ++i)
-            self->send(created, join_atom::value, f[i], accumulator);
-          break;
+      auto act = factory.apply(s.rand.next_int(100));
+      if (act == action::compute) {
+        for (size_t i = 0; i < 1; ++i) {
+          if (fibonacci(fib_index) != 9227465) {
+            self->send(accumulator, stop_atom::value, action::error);
+            fib_index = fib_index + 1;
+            ;
+          }
         }
-        default: // case action::none:
-          assert(s.chats().size() == 0 && s.friends.size() > 0);
-          self->send(accumulator, stop_atom::value, action::none);
-          break;
+        self->send(accumulator, stop_atom::value, action::compute);
+      } else if (act == action::invite || s.chats.empty()) {
+        assert(s.friends.size() != 0);
+        auto created = self->spawn(chat, self);
+        s.chats.emplace_back(created);
+        std::vector<caf::actor> f(s.friends.size());
+        std::copy(s.friends.begin(), s.friends.end(), f.begin());
+        s.rand.shuffle(f);
+        auto invitations = static_cast<size_t>(
+          s.rand.next_int(static_cast<uint32_t>(s.friends.size())));
+        if (invitations == 0)
+          invitations = 1;
+        self->send(accumulator, bump_atom::value, action::invite, invitations);
+        for (size_t i = 0; i < invitations; ++i)
+          self->send(created, join_atom::value, f[i], accumulator);
+      } else if (act == action::post)
+        self->send(s.chats[index], post_atom::value, payload{}, accumulator);
+      else if (act == action::leave)
+        self->send(s.chats[index], leave_atom::value, self, false, accumulator);
+      else { // case action::none:
+        assert(s.chats().size() == 0 && s.friends.size() > 0);
+        self->send(accumulator, stop_atom::value, action::none);
       }
     },
   };
