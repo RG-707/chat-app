@@ -325,7 +325,7 @@ caf::behavior directory(caf::stateful_actor<directory_state>* self,
         s.clients.erase(itr);
       if (s.clients.empty()) {
         self->send(s.poker, finished_atom::value);
-        self->quit();
+//        self->quit();
       }
     },
     [=](poke_atom, const behavior_factory& factory,
@@ -339,6 +339,7 @@ caf::behavior directory(caf::stateful_actor<directory_state>* self,
       for (auto& client : s.clients)
         self->send(client, logout_atom::value);
     },
+    [=](quit_atom) { self->quit(); },
   };
 }
 
@@ -414,16 +415,22 @@ caf::behavior poker(caf::stateful_actor<poker_state>* self, uint64_t clients,
   s.logouts = 0;
   s.confirmations = 0;
   s.iteration = 0;
+  auto rand = pseudo_random(42);
+  s.directories.reserve(num_directories);
+  for (size_t i = 0; i < num_directories; ++i)
+    s.directories.emplace_back(
+        self->spawn(directory, rand.next(), befriend));
+  
   self->set_default_handler(caf::print_and_drop);
   return {
     [=](apply_atom, caf::actor& bench, bool last) {
       auto& s = self->state;
-      auto rand = pseudo_random(42);
-      s.directories.clear();
-      s.directories.reserve(num_directories);
-      for (size_t i = 0; i < num_directories; ++i)
-        s.directories.emplace_back(
-          self->spawn(directory, rand.next(), befriend));
+      //auto rand = pseudo_random(42);
+      //s.directories.clear();
+      //s.directories.reserve(num_directories);
+      //for (size_t i = 0; i < num_directories; ++i)
+      //  s.directories.emplace_back(
+      //    self->spawn(directory, rand.next(), befriend));
       s.confirmations = static_cast<size_t>(turns);
       s.logouts = s.directories.size();
       s.bench = bench;
@@ -533,6 +540,8 @@ caf::behavior poker(caf::stateful_actor<poker_state>* self, uint64_t clients,
 
             self->send(s.bench, append_atom::value, title_text.str(),
                        result_text.str(), act_text.str());
+            for(auto& d : s.directories)
+              self->send(d, quit_atom::value);
             self->quit();
           }
         }
