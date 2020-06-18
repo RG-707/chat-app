@@ -251,13 +251,13 @@ client(caf::stateful_actor<client_state>* self, const uint64_t /*id*/,
             self->send(accumulator, stop_atom_v, action::none);
           break;
         case action::compute:
-	  for(size_t i = 0; i < 10000; ++i) {
-            if (fibonacci(fib_index) != 9227465) {
-              self->send(accumulator, stop_atom_v, action::error);
-	      fib_index = fib_index + 1;
-	    }
-	  }
-
+	  //for(size_t i = 0; i < 10000; ++i) {
+            //if (fibonacci(fib_index) != 9227465) {
+              //self->send(accumulator, stop_atom_v, action::error);
+	      //fib_index = fib_index + 1;
+	    //}
+	  //}
+          fibonacci(fib_index);
 	  self->send(accumulator, stop_atom_v, action::compute);
           break;
         case action::invite: {
@@ -500,16 +500,16 @@ caf::behavior poker(caf::stateful_actor<poker_state>* self, uint64_t clients,
             std::stringstream title_text;
             std::stringstream result_text;
             if (!parseable) {
-              title_text << std::string(31, ' ') << std::setw(18) << "j-mean"
-                         << std::setw(18) << "j-median" << std::setw(18)
-                         << "j-error" << std::setw(18) << "j-stddev"
-                         << std::setw(32) << "quality of service" << std::endl;
-              result_text << "Turns" << std::string(27, ' ') << std::setw(17)
-                          << stats.mean() << " " << std::setw(17)
-                          << stats.median() << " " << std::setw(17)
-                          << stats.err() << " " << std::setw(17)
-                          << stats.stddev() << " " << std::setw(31)
-                          << sample_stats(qos).median() << std::endl;
+//              title_text << std::string(31, ' ') << std::setw(18) << "j-mean"
+//                         << std::setw(18) << "j-median" << std::setw(18)
+//                         << "j-error" << std::setw(18) << "j-stddev"
+//                         << std::setw(32) << "quality of service" << std::endl;
+//              result_text << "Turns" << std::string(27, ' ') << std::setw(17)
+//                          << stats.mean() << " " << std::setw(17)
+//                          << stats.median() << " " << std::setw(17)
+//                          << stats.err() << " " << std::setw(17)
+//                          << stats.stddev() << " " << std::setw(31)
+//                          << sample_stats(qos).median() << std::endl;
             } else {
               result_text << "Turns"
                           << "," << stats.mean() << "," << stats.median() << ","
@@ -520,15 +520,15 @@ caf::behavior poker(caf::stateful_actor<poker_state>* self, uint64_t clients,
             const char* separator = parseable ? "," : ": ";
             std::stringstream act_text;
             if (!parseable)
-              act_text << "\nActs:";
+//              act_text << "\nActs:";
             act_text << "\nPost" << separator << s.actions[action::post]
                      << "\nLeave" << separator << s.actions[action::leave]
                      << "\nInvite" << separator << s.actions[action::invite]
                      << "\nCompute" << separator << s.actions[action::compute]
-                     << "\nPostDelivery" << separator
-                     << s.actions[action::post_delivery] << "\nIgnore"
-                     << separator << s.actions[action::ignore] << "\nNone"
-                     << separator << s.actions[action::none] << std::endl;
+//                     << "\nPostDelivery" << separator
+//                     << s.actions[action::post_delivery] << "\nIgnore"
+//                     << separator << s.actions[action::ignore] << 
+                    << "\nNone" << separator << s.actions[action::none] << std::endl;
 
             self->send(s.bench, append_atom_v, title_text.str(),
                        result_text.str(), act_text.str());
@@ -632,13 +632,13 @@ void caf_main(caf::actor_system& system, const config& cfg) {
       sample_stats stats(durations);
       std::stringstream result_text;
       if (!cfg.parseable) {
-        result_text << std::string(31, ' ') << std::setw(18) << "i-mean"
-                    << std::setw(18) << "i-median" << std::setw(18) << "i-error"
-                    << std::setw(18) << "i-stddev" << std::endl
-                    << "Chat App" << std::string(24, ' ') << std::setw(17)
-                    << stats.mean() << " " << std::setw(17) << stats.median()
-                    << " " << std::setw(17) << stats.err() << " "
-                    << std::setw(17) << stats.stddev() << std::endl;
+//        result_text << std::string(31, ' ') << std::setw(18) << "i-mean"
+//                    << std::setw(18) << "i-median" << std::setw(18) << "i-error"
+//                    << std::setw(18) << "i-stddev" << std::endl
+//                    << "Chat App" << std::string(24, ' ') << std::setw(17)
+//                    << stats.mean() << " " << std::setw(17) << stats.median()
+//                    << " " << std::setw(17) << stats.err() << " "
+//                    << std::setw(17) << stats.stddev() << std::endl;
       } else {
         result_text << "Chat App"
                     << "," << stats.mean() << "," << stats.median() << ","
