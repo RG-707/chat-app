@@ -645,12 +645,11 @@ void caf_main(caf::actor_system& system, const config& cfg) {
                     << " " << std::setw(17) << stats.err() << " "
                     << std::setw(17) << stats.stddev() << std::endl;
       } else {
-        result_text << "Chat App"
-                    << "," << stats.mean() << "," << stats.median() << ","
-                    << stats.err() << "," << stats.stddev() << std::endl;
+        result_text << stats.mean() << "," << stats.stddev() << std::endl; 
+	//<< "Chat App" << ","  << stats.median() << "," << stats.err() << "," 
       }
       std::cout << result_text.str();
-      std::cout << title << result << act;
+      //std::cout << title << result << act;
     });
     self->send(chat, quit_atom::value);
   }

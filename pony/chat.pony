@@ -494,12 +494,12 @@ actor Poker
           else
             bench.append(
               ",".join([
-                "Turns"
-                stats.mean().string()
-                stats.median().string()
-                stats.err().string()
-                stats.stddev().string()
-                quality_of_service
+                //"Turns"
+                //stats.mean().string()
+                //stats.median().string()
+                //stats.err().string()
+                //stats.stddev().string()
+                //quality_of_service
               ].values())
             )
           end         
@@ -526,13 +526,13 @@ actor Poker
                   ].values()
                 )
               )
-            else
-              bench.append(
-                ",".join([
-                  identifier
-                  value.string()
-                ].values())
-              )
+            //else
+              //bench.append(
+              //  ",".join([
+              //    identifier
+              //    value.string()
+              //  ].values())
+              //)
             end
           end
         end

@@ -49,10 +49,10 @@ class Result
         ].values())
     else
       ",".join([
-        _benchmark
+        //_benchmark
         stats.mean().string()
-        stats.median().string()
-        stats.err().string()
+        //stats.median().string()
+        //stats.err().string()
         stats.stddev().string()
       ].values())
     end
